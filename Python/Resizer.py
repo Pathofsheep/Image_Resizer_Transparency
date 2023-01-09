@@ -7,6 +7,7 @@ Created on Wed Nov 30 15:29:17 2022
 import os
 import cv2
 
+
 # Function to resize image, keeping aspect ratio
 # (c) @thewaywewere - https://stackoverflow.com/questions/44650888/resize-an-image-without-distortion-opencv
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -40,36 +41,45 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # return the resized image
     return resized
 
+
 # Parameters
-_read_directory = "C:\\Users\\Patri\\Desktop\\Inpsyde"
-_new_Directory = "C:\\Users\\Patri\\Desktop\\Inpsyde\\edited2\\"
+_read_directory = "C:\\Users\\Patri\\Desktop\\BENELUX NEW\\Products additional\\"
+_new_Directory = "C:\\Users\\Patri\\Desktop\\BENELUX NEW\\Products additional\\edited\\"
 _wanted_Width = 925     #370 * 2.5 for better resolution
 _wanted_Height = 500    #200 * 2.5
 
 # Loop over every file (maybe change this to only go for pics?)
+# Currently ignoring any folders
 for filename in os.listdir(_read_directory):
     f = os.path.join(_read_directory, filename)
     # Checking if it is a file and not a folder
     if os.path.isfile(f) and filename != "desktop.ini":
-        #print("working on: " + f)
+        print("working on: " + f)
         # Read the file
         img = cv2.imread(f, cv2.IMREAD_UNCHANGED)
-        # Resize it, assuming that the pic is in portrait, maybe todo for landscape
-        img = image_resize(img, height = _wanted_Height)
-        # Get theshape of the image
+        # Get the shape of the image to determine where borders have to be placed
+        (img_height, img_width) = img.shape[:2]
+        # Resize it depending on image ratio
+        if img_height / img_width <= _wanted_Height / _wanted_Width:
+            img = image_resize(img, width=_wanted_Width)
+        else:
+            img = image_resize(img, height=_wanted_Height)
+        # Get the new shape of the image
         (img_height, img_width) = img.shape[:2]
         # Calc how large the borders have to be
-        left_border = int((_wanted_Width - img_height) / 2)
+        left_border = int((_wanted_Width - img_width) / 2)
         right_border = _wanted_Width - img_width - left_border
+        top_border = int((_wanted_Height - img_height) / 2)
+        bottom_border = _wanted_Height - img_height - top_border
+
         # Convert Image to BGRA (if not already in correct format)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
-        # If image shape is wrong, borders will have negative size, leading to an error, just avoiding it here
-        if(left_border >= 0 and right_border >= 0):
-            # Create a border on image
-            img = cv2.copyMakeBorder(img, 0, 0, left_border, right_border, cv2.BORDER_CONSTANT, value =[0,0,0,0])
-            # Write image
-            cv2.imwrite(_new_Directory + filename[0:-4] + ".png", img)
-        else:
-            # Skip image if shape is wrong
-            print("Error [Wrong Shape], Skipping Image: " + f)
 
+        # Create a border on the sides of the image
+        img = cv2.copyMakeBorder(img, top_border, bottom_border, left_border,
+                                 right_border, cv2.BORDER_CONSTANT, value=[0, 0, 0, 0])
+        # Create dir if it doesn't yet exist
+        if not os.path.exists(_new_Directory):
+            os.mkdir(_new_Directory)
+        # Write image
+        cv2.imwrite(_new_Directory + filename[0:-4] + ".png", img)
