@@ -36,12 +36,12 @@ def image_resize(image, _width=None, _height=None):
 
 # Parameters
 debug = True
-read_directory = "H:\\My Drive\\Work\\ClubASV\\Lisa"
-new_Directory = "H:\\My Drive\\Work\\ClubASV\\Lisa\\edited\\"
-wanted_width = 1080
-wanted_height = 810
-# operation = "Crop"
-operation = "Borders"
+read_directory = r"H:\Meine Ablage\Work\2023_05_11"
+new_Directory = read_directory + "\\edited\\"
+wanted_width = 733
+wanted_height = 500
+operation = "Crop"
+# operation = "Borders"
 
 # Loop over every file (maybe change this to only go for pics?)
 # Currently ignoring any folders
@@ -116,5 +116,5 @@ for filename in os.listdir(read_directory):
             os.mkdir(new_Directory)
         # And finally, save the image with prefix in directory
         if debug:
-            print("Writing file:\t" + new_Directory + prefix + filename[0:-4] + ".png")
+            print("Writing file:\t" + new_Directory + r'\\' + prefix + filename[0:-4] + ".png")
         cv2.imwrite(new_Directory + prefix + filename[0:-4] + ".png", img)
